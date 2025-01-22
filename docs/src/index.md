@@ -4,7 +4,7 @@ CurrentModule = TPSAInterface
 
 # TPSAInterface
 
-Documentation for [TPSAInterface](https://github.com/bmad-sim/TPSAInterface.jl).
+The TPSA package extension should provide overloads for the following functions:
 
 ```@docs
 
