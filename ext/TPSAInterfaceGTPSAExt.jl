@@ -68,7 +68,7 @@ function TI.compose!(
 end
 
 TI.fgrad!(g::TPS{T}, F::AbstractArray{TPS{T,D}}, h::TPS{T}) where {T,D} = GTPSA.fgrad!(g, F, h)
-TI.liebra!(
+function TI.liebra!(
   G::AbstractArray{TPS{T,DG}}, 
   F::AbstractArray{TPS{T,DF}}, 
   H::AbstractArray{TPS{T,DH}}
