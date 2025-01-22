@@ -47,8 +47,8 @@ TI.mul!(t::TPS, a, b) = (GTPSA.mul!(t, a, b); return t)
 TI.div!(t::TPS, a, b) = (GTPSA.div!(t, a, b); return t)
 TI.pow!(t::TPS, a, b) = (GTPSA.pow!(t, a, b); return t)
 
-TI.getord!(t::TPS, t1::TPS, order) = GTPSA.getord!(t, t1, order)
-TI.cutord!(t::TPS, t1::TPS, order) = GTPSA.cutord!(t, t1, order)
+TI.getord!(t::TPS, t1::TPS, ord) = GTPSA.getord!(t, t1, ord)
+TI.cutord!(t::TPS, t1::TPS, ord) = GTPSA.cutord!(t, t1, ord)
 
 TI.deriv!(t::TPS, t1::TPS, i) = GTPSA.deriv!(t, t1, i)
 
@@ -65,6 +65,16 @@ function TI.compose!(
   m1::Union{AbstractArray{TPS{T,D1}},TPS{T,D1}}
 ) where {T<:Union{Float64,ComplexF64},D,D1,D2}
   return GTPSA.compose!(m, m2, m1)
+end
+
+TI.fgrad!(g::TPS{T}, F::AbstractArray{TPS{T,D}}, h::TPS{T}) where {T,D} = GTPSA.fgrad!(g, F, h)
+TI.liebra!(
+  G::AbstractArray{TPS{T,DG}}, 
+  F::AbstractArray{TPS{T,DF}}, 
+  H::AbstractArray{TPS{T,DH}}
+) where {T,DG,DF,DH}
+  @assert !(G === F) && !(G === H) "Aliasing any source arguments with the destination in lb! is not allowed"
+  return GTPSA.liebra!(numvars(F), F, H, G)
 end
 
 end
