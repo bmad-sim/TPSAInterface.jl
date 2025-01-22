@@ -7,3 +7,5 @@
 This package provides a backend-agnostic interface for Truncated Power Series Algebra (TPSA) libraries. Currently supported TPSA libraries are:
 
 - [GTPSA.jl](https://github.com/bmad-sim/GTPSA.jl)
+
+To add your TPSA library, see the [documentation](https://bmad-sim.github.io/TPSAInterface.jl/stable)
