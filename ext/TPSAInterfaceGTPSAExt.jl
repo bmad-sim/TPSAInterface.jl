@@ -26,7 +26,7 @@ TI.nvars(::Type{TPS{T,GTPSA.Dynamic}}) where {T} = TI.nvars(TPS{T,GTPSA.desc_cur
 TI.nparams(::Type{TPS{T,GTPSA.Dynamic}}) where {T} = TI.nparams(TPS{T,GTPSA.desc_current})
 TI.ndiffs(::Type{TPS{T,GTPSA.Dynamic}}) where {T} = TI.ndiffs(TPS{T,GTPSA.desc_current})
 TI.maxord(::Type{TPS{T,GTPSA.Dynamic}}) where {T} = TI.maxord(TPS{T,GTPSA.desc_current})
-TI.numcoefs(::Type{TPS{T,GTPSA.Dynamic}}) where {T,D} = TI.numcoefs(TPS{T,GTPSA.desc_current})
+TI.numcoefs(::Type{TPS{T,GTPSA.Dynamic}}) where {T} = TI.numcoefs(TPS{T,GTPSA.desc_current})
 
 TI.scalar(t::TPS) = GTPSA.scalar(t)
 
