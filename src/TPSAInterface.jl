@@ -73,10 +73,15 @@ setm!(t, v, mono::AbstractArray{<:Integer}) = error("Not implemented!")
 copy!(t, t1) = error("Not implemented!")
 
 # Arithmetic operators
+"Sets the TPS `t` equal to `a + b`"
 add!(t, a, b) = error("Not implemented!")
+"Sets the TPS `t` equal to `a - b`"
 sub!(t, a, b) = error("Not implemented!")
+"Sets the TPS `t` equal to `a * b`"
 mul!(t, a, b) = error("Not implemented!")
+"Sets the TPS `t` equal to `a / b`"
 div!(t, a, b) = error("Not implemented!")
+"Sets the TPS `t` equal to `a ^ b`"
 pow!(t, a, b) = error("Not implemented!")
 
 "Sets `t` equal to the homogenous polynomial of order `ord` in `t1`."
