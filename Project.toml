@@ -3,6 +3,9 @@ uuid = "575459ea-959c-4603-9b15-d63fb6693033"
 authors = ["Matt Signorelli <mgs255@cornell.edu> and contributors"]
 version = "1.0.0-DEV"
 
+[deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+
 [weakdeps]
 GTPSA = "b27dd330-f138-47c5-815b-40db9dd9b6e8"
 
@@ -11,6 +14,7 @@ TPSAInterfaceGTPSAExt = "GTPSA"
 
 [compat]
 GTPSA = "1.4"
+LinearAlgebra = "1.11.0"
 julia = "1.9"
 
 [extras]

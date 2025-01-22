@@ -1,4 +1,5 @@
 module TPSAInterface
+using LinearAlgebra
 
 # Traits
 abstract type TPSBehavior end
