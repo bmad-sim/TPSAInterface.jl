@@ -63,6 +63,9 @@ TI.mul!(t::TPS, a, b) = (GTPSA.mul!(t, a, b); return t)
 TI.div!(t::TPS, a, b) = (GTPSA.div!(t, a, b); return t)
 TI.pow!(t::TPS, a, b) = (GTPSA.pow!(t, a, b); return t)
 
+TI.real!(t::TPS, t1) = (GTPSA.real!(t, t1); return t)
+TI.imag!(t::TPS, t1) = (GTPSA.imag!(t, t1); return t)
+
 TI.getord!(t::TPS, t1::TPS, ord) = GTPSA.getord!(t, t1, ord)
 TI.cutord!(t::TPS, t1::TPS, ord) = GTPSA.cutord!(t, t1, ord)
 

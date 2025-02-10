@@ -80,7 +80,11 @@ Sets the coefficient of the monomial with orders `mono` to `v`.
 """
 setm!(t, v, mono::AbstractArray{<:Integer}) = error("Not implemented!")
 
-"Sets the entire TPS `t` equal to `t1`, where `t1` may be another TPS or a `Number`."
+"""
+Sets the entire TPS `t` equal to `t1`, where `t1` may be another TPS or a `Number`. Promotion 
+is supported; e.g. if `t` has `numtype` `ComplexF64`, and `t1` has `numtype` `Float64`), 
+calling `copy!(t, t1)` is allowed
+"""
 copy!(t, t1) = error("Not implemented!")
 
 # Arithmetic operators
@@ -94,6 +98,12 @@ mul!(t, a, b) = error("Not implemented!")
 div!(t, a, b) = error("Not implemented!")
 "Sets the TPS `t` equal to `a ^ b`"
 pow!(t, a, b) = error("Not implemented!")
+
+"Sets the TPS `t` equal to `real(t1)`"
+real!(t, t1) = copy!(t, real(t1))
+
+"Sets the TPS `t` equal to `imag(t1)`"
+imag!(t, t1) = copy!(t, imag(t1))
 
 "Sets `t` equal to the homogenous polynomial of order `ord` in `t1`."
 getord!(t, t1, ord) = error("Not implemented!")
