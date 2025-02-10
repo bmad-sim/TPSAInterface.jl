@@ -1,5 +1,7 @@
 module TPSAInterface
 using LinearAlgebra
+export AbstractTPSADef, 
+       DefGTPSA
 
 # Traits
 abstract type TPSBehavior end
@@ -10,6 +12,8 @@ abstract type TPSTypeBehavior end
 struct IsTPSType <: TPSTypeBehavior end
 struct IsNotTPSType <: TPSTypeBehavior end
 
+include("defs.jl")
+
 "Returns `TPSAInterface.IsTPS() if `t` is a TPS, else `TPSAInterface.IsNotTPS()."
 is_tps(t) = IsNotTPS() 
 "Returns `TPSAInterface.IsTPSType() if `t` is a TPS type, else `TPSAInterface.IsNotTPSType()."
@@ -19,16 +23,23 @@ is_tps_type(t) = IsNotTPSType()
 numtype(t::Number) = typeof(t)
 numtype(::Type{T}) where {T<:Number} = T
 
-"Returns the number of variables in the TPSA. `t` may be a TPS or TPS `Type`."
-nvars(t) = 0 
-"Returns the number of parameters in the TPSA. `t` may be a TPS or TPS `Type`."
-nparams(t) = 0 
-"Returns the number of variables + parameters in the TPSA. `t` may be a TPS or TPS `Type`."
-ndiffs(t) = 0 
-"Returns the maximum truncation order of the TPSA. `t` may be a TPS or TPS `Type`."
-maxord(t) = 0 
-"Returns the number of monomial coefficients in the TPSA. `t` may be a TPS or TPS `Type`."
-numcoefs(t) = 1 
+# Constructors using TPSA definition
+init_tps(::Type, ::AbstractTPSADef) = error("Please specify a TPSA definition.")
+init_tps_type(::Type, ::AbstractTPSADef) = error("Please specify a TPSA definition.")
+
+getdef(t::Number) = error("$t is not a TPS")
+getdef(::Type{T}) where {T<:Number} = error("$T is not a TPS type!")
+
+"Returns the number of variables in the TPSA. `t` may be a TPS, TPS `Type`, or a `AbstractTPSADef`."
+nvars(t) = nvars(getdef(t))
+"Returns the number of parameters in the TPSA. `t` may be a TPS, TPS `Type`, or a `AbstractTPSADef`."
+nparams(t) = nparams(getdef(t))
+"Returns the number of variables + parameters in the TPSA. `t` may be a TPS, TPS `Type`, or a `AbstractTPSADef`."
+ndiffs(t) = ndiffs(getdef(t))
+"Returns the maximum truncation order of the TPSA. `t` may be a TPS, TPS `Type`, or a `AbstractTPSADef`."
+maxord(t) = maxord(getdef(t))
+"Returns the number of monomial coefficients in the TPSA. `t` may be a TPS, TPS `Type`, or a `AbstractTPSADef`."
+nmonos(t) = nmonos(getdef(t))
 
 "Returns the zeroth order (scalar) part of the TPS `t`."
 scalar(t::Number) = t

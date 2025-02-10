@@ -15,7 +15,7 @@ TPSAInterface.nvars
 TPSAInterface.nparams
 TPSAInterface.ndiffs
 TPSAInterface.maxord
-TPSAInterface.numcoefs
+TPSAInterface.nmonos
 TPSAInterface.scalar
 TPSAInterface.norm_tps
 TPSAInterface.clear!

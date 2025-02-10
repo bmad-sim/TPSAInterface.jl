@@ -1,32 +1,48 @@
 module TPSAInterfaceGTPSAExt
 import TPSAInterface as TI
-using GTPSA: GTPSA, TPS
+using TPSAInterface: DefGTPSA
+using GTPSA: GTPSA, Descriptor, TPS
+
+# =================================== #
+# Static Descriptor Resolution:
+TI.init_tps(::Type{T}, ::DefGTPSA{D,Nothing}) where {T,D} = TPS{T,D}()
+TI.init_tps_type(::Type{T}, ::DefGTPSA{D,Nothing}) where {T,D} = TPS{T,D}
+TI.getdef(::TPS{T,D}) where {T,D} = DefGTPSA{D,Nothing}(; dynamic_descriptor=nothing)
+TI.getdef(::Type{TPS{T,D}}) where {T,D} = DefGTPSA{D,Nothing}(; dynamic_descriptor=nothing)
+
+TI.nvars(::DefGTPSA{D,Nothing}) where {D}   = Int(GTPSA.numvars(D))
+TI.nparams(::DefGTPSA{D,Nothing}) where {D} = Int(GTPSA.numparams(D))
+TI.ndiffs(::DefGTPSA{D,Nothing}) where {D}  = Int(GTPSA.numnn(D))
+TI.maxord(::DefGTPSA{D,Nothing}) where {D}  = Int(unsafe_load(D.desc).mo)
+TI.nmonos(::DefGTPSA{D,Nothing}) where {D}  = Int(unsafe_load(unsafe_load(D.desc).ord2idx, maxord(D)))
+
+# =================================== #
+# Dynamic Descriptor Resolution:
+function TI.init_tps(::Type{T}, def::DefGTPSA{GTPSA.Dynamic,Descriptor}) where {T}
+  return TPS{T,GTPSA.Dynamic}(use=def.dynamic_descriptor)
+end
+TI.init_tps_type(::Type{T}, ::DefGTPSA{GTPSA.Dynamic,Descriptor}) where {T} = TPS{T,GTPSA.Dynamic}
+
+function TI.getdef(t::TPS{T,GTPSA.Dynamic}) where {T} 
+  return DefGTPSA{GTPSA.Dynamic,Descriptor}(; dynamic_descriptor=GTPSA.getdesc(t))
+end
+
+function TI.getdef(::Type{TPS{T,GTPSA.Dynamic}}) where {T}
+  return DefGTPSA{GTPSA.Dynamic,Descriptor}(; dynamic_descriptor=GTPSA.desc_current)
+end
+
+TI.nvars(def::DefGTPSA{GTPSA.Dynamic,Descriptor})   = Int(GTPSA.numvars(def.dynamic_descriptor))
+TI.nparams(def::DefGTPSA{GTPSA.Dynamic,Descriptor}) = Int(GTPSA.numparams(def.dynamic_descriptor))
+TI.ndiffs(def::DefGTPSA{GTPSA.Dynamic,Descriptor})  = Int(GTPSA.numnn(def.dynamic_descriptor))
+TI.maxord(def::DefGTPSA{GTPSA.Dynamic,Descriptor})  = Int(unsafe_load(def.dynamic_descriptor.desc).mo)
+TI.nmonos(def::DefGTPSA{GTPSA.Dynamic,Descriptor})  = Int(unsafe_load(unsafe_load(dynamic_descriptor.desc).ord2idx, maxord(def)))
+# =================================== #
 
 TI.is_tps(::TPS) = TI.IsTPS()
 TI.is_tps_type(::Type{<:TPS}) = TI.IsTPSType()
 
 TI.numtype(::TPS{T}) where {T} = T
 TI.numtype(::Type{<:TPS{T}}) where {T} = T
-
-TI.nvars(t::TPS) = GTPSA.numvars(t)
-TI.nparams(t::TPS) = GTPSA.numparms(t)
-TI.ndiffs(t::TPS) = GTPSA.numnn(t)
-TI.maxord(t::TPS) = unsafe_load(GTPSA.getdesc(t).desc).mo
-TI.numcoefs(t::TPS) = GTPSA.numcoefs(t)
-
-# Static Descriptor resolution:
-TI.nvars(::Type{TPS{T,D}}) where {T,D} = GTPSA.numvars(D)
-TI.nparams(::Type{TPS{T,D}}) where {T,D} = GTPSA.numparams(D)
-TI.ndiffs(::Type{TPS{T,D}}) where {T,D} = GTPSA.numnn(D)
-TI.maxord(::Type{TPS{T,D}}) where {T,D} = unsafe_load(D.desc).mo
-TI.numcoefs(::Type{TPS{T,D}}) where {T,D} = unsafe_load(unsafe_load(D.desc).ord2idx, maxord(D))
-
-# Dynamic Descriptor resolution:
-TI.nvars(::Type{TPS{T,GTPSA.Dynamic}}) where {T} = TI.nvars(TPS{T,GTPSA.desc_current})
-TI.nparams(::Type{TPS{T,GTPSA.Dynamic}}) where {T} = TI.nparams(TPS{T,GTPSA.desc_current})
-TI.ndiffs(::Type{TPS{T,GTPSA.Dynamic}}) where {T} = TI.ndiffs(TPS{T,GTPSA.desc_current})
-TI.maxord(::Type{TPS{T,GTPSA.Dynamic}}) where {T} = TI.maxord(TPS{T,GTPSA.desc_current})
-TI.numcoefs(::Type{TPS{T,GTPSA.Dynamic}}) where {T} = TI.numcoefs(TPS{T,GTPSA.desc_current})
 
 TI.scalar(t::TPS) = GTPSA.scalar(t)
 
