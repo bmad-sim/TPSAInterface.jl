@@ -3,6 +3,7 @@ using LinearAlgebra
 export AbstractTPSADef, 
        DefGTPSA
 
+import Base: copy!
 # Traits
 abstract type TPSBehavior end
 struct IsTPS <: TPSBehavior end
