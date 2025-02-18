@@ -1,7 +1,7 @@
 module TPSAInterface
 using LinearAlgebra
-export AbstractTPSADef, 
-       DefGTPSA
+export AbstractTPSAInit,
+       InitGTPSA
 
 import Base: copy!
 # Traits
@@ -13,7 +13,7 @@ abstract type TPSTypeBehavior end
 struct IsTPSType <: TPSTypeBehavior end
 struct IsNotTPSType <: TPSTypeBehavior end
 
-include("defs.jl")
+include("inits.jl")
 
 "Returns `TPSAInterface.IsTPS() if `t` is a TPS, else `TPSAInterface.IsNotTPS()."
 is_tps(t) = IsNotTPS() 
@@ -24,23 +24,34 @@ is_tps_type(t) = IsNotTPSType()
 numtype(t::Number) = typeof(t)
 numtype(::Type{T}) where {T<:Number} = T
 
-# Constructors using TPSA definition
-init_tps(::Type, ::AbstractTPSADef) = error("Please specify a TPSA definition.")
-init_tps_type(::Type, ::AbstractTPSADef) = error("Please specify a TPSA definition.")
+# Constructors using TPSA initializer
+init_tps(::Type, ::AbstractTPSAInit) = error("Please specify a TPSA initializer.")
+init_tps_type(::Type, ::AbstractTPSAInit) = error("Please specify a TPSA initializer.")
 
-getdef(t::Number) = error("$t is not a TPS")
-getdef(::Type{T}) where {T<:Number} = error("$T is not a TPS type!")
+function mono(::Type{T}, init::AbstractTPSAInit, idx::Integer) where {T<:Number}
+    t = init_tps(T, init)
+    seti!(t, 1, idx)
+    return t
+end
 
-"Returns the number of variables in the TPSA. `t` may be a TPS, TPS `Type`, or a `AbstractTPSADef`."
-nvars(t) = nvars(getdef(t))
-"Returns the number of parameters in the TPSA. `t` may be a TPS, TPS `Type`, or a `AbstractTPSADef`."
-nparams(t) = nparams(getdef(t))
-"Returns the number of variables + parameters in the TPSA. `t` may be a TPS, TPS `Type`, or a `AbstractTPSADef`."
-ndiffs(t) = ndiffs(getdef(t))
-"Returns the maximum truncation order of the TPSA. `t` may be a TPS, TPS `Type`, or a `AbstractTPSADef`."
-maxord(t) = maxord(getdef(t))
-"Returns the number of monomial coefficients in the TPSA. `t` may be a TPS, TPS `Type`, or a `AbstractTPSADef`."
-nmonos(t) = nmonos(getdef(t))
+function mono(::Type{T}, init::AbstractTPSAInit, mono::AbstractArray{<:Integer}) where {T<:Number}
+    t = init_tps(T, init)
+    setm!(t, 1, mono)
+    return t
+end
+
+# Default to Float64:
+mono(init::AbstractTPSAInit, idx_or_mono) = mono(Float64, init, idx_or_mono)
+
+getinit(t::Number) = error("$t is not a TPS")
+getinit(::Type{T}) where {T<:Number} = error("$T is not a TPS type!")
+
+"Returns the number of variables + parameters in the TPSA. `t` may be a TPS, TPS `Type`, or a `AbstractTPSAInit`."
+ndiffs(t) = ndiffs(getinit(t))
+"Returns the maximum truncation order of the TPSA. `t` may be a TPS, TPS `Type`, or a `AbstractTPSAInit`."
+maxord(t) = maxord(getinit(t))
+"Returns the number of monomial coefficients in the TPSA. `t` may be a TPS, TPS `Type`, or a `AbstractTPSAInit`."
+nmonos(t) = nmonos(getinit(t))
 
 "Returns the zeroth order (scalar) part of the TPS `t`."
 scalar(t::Number) = t
@@ -132,5 +143,18 @@ compose!(m, m2, m1) = error("Not implemented!")
 # TO-DO: implement defaults of these (maybe in NNF)
 fgrad!(g, F, h) = error("Not implemented!") # computes F dot grad h
 liebra!(G, F, H) = error("Not implemented!") # Computes Lie bracket for Hamiltonian vector fields
+
+"""
+Cycles through the nonzero monomial coefficients in the TPS `t` starting at `i`. Set 
+`i` equal to `-1` to start at the first nonzero monomial coefficient. Returns the next 
+nonzero monomial coefficient index and will, if provided, set `m_` and `v_` to the monomial 
+orders and coefficient of the next nonzero monomial coefficient, respectively. 
+"""
+cycle!(
+    t, 
+    i::Integer; 
+    mono::Union{AbstractArray{<:Integer},Nothing}=nothing, 
+    val::Union{Ref{<:Number},Nothing}=nothing
+) = error("Not implemented!")
 
 end

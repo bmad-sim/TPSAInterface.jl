@@ -1,8 +1,8 @@
 # TPSA Backends
-abstract type AbstractTPSADef end
+abstract type AbstractTPSAInit end
 
 """
-    DefGTPSA{D,DD}
+    InitGTPSA{D,DD}
 
 Struct used to define a TPSA using the [GTPSA.jl](https://github.com/bmad-sim/GTPSA.jl) backend.
 
@@ -10,7 +10,7 @@ Defined by [`TPSAInterface.jl`](https://github.com/bmad-sim/TPSAInterface.jl).
 
 # Constructors
 
-    DefGTPSA{D,DD}(; dynamic_descriptor=nothing)
+    InitGTPSA{D,DD}(; dynamic_descriptor=nothing)
 
 ## Fields
   - For static `Descriptor` resolution:
@@ -21,6 +21,6 @@ Defined by [`TPSAInterface.jl`](https://github.com/bmad-sim/TPSAInterface.jl).
     + `D == GTPSA.Dynamic`
     + `DD == Descriptor` and `dynamic_descriptor` is said `Descriptor`
 """
-Base.@kwdef struct DefGTPSA{D,DD} <: AbstractTPSADef
+Base.@kwdef struct InitGTPSA{D,DD} <: AbstractTPSAInit
     dynamic_descriptor::DD = nothing
 end

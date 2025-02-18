@@ -1,41 +1,37 @@
 module TPSAInterfaceGTPSAExt
 import TPSAInterface as TI
-using TPSAInterface: DefGTPSA
+using TPSAInterface: InitGTPSA
 using GTPSA: GTPSA, Descriptor, TPS
 
 # =================================== #
 # Static Descriptor Resolution:
-TI.init_tps(::Type{T}, ::DefGTPSA{D,Nothing}) where {T,D} = TPS{T,D}()
-TI.init_tps_type(::Type{T}, ::DefGTPSA{D,Nothing}) where {T,D} = TPS{T,D}
-TI.getdef(::TPS{T,D}) where {T,D} = DefGTPSA{D,Nothing}(; dynamic_descriptor=nothing)
-TI.getdef(::Type{TPS{T,D}}) where {T,D} = DefGTPSA{D,Nothing}(; dynamic_descriptor=nothing)
+TI.init_tps(::Type{T}, ::InitGTPSA{D,Nothing}) where {T,D} = TPS{T,D}()
+TI.init_tps_type(::Type{T}, ::InitGTPSA{D,Nothing}) where {T,D} = TPS{T,D}
+TI.getinit(::TPS{T,D}) where {T,D} = InitGTPSA{D,Nothing}(; dynamic_descriptor=nothing)
+TI.getinit(::Type{TPS{T,D}}) where {T,D} = InitGTPSA{D,Nothing}(; dynamic_descriptor=nothing)
 
-TI.nvars(::DefGTPSA{D,Nothing}) where {D}   = Int(GTPSA.numvars(D))
-TI.nparams(::DefGTPSA{D,Nothing}) where {D} = Int(GTPSA.numparams(D))
-TI.ndiffs(::DefGTPSA{D,Nothing}) where {D}  = Int(GTPSA.numnn(D))
-TI.maxord(::DefGTPSA{D,Nothing}) where {D}  = Int(unsafe_load(D.desc).mo)
-TI.nmonos(::DefGTPSA{D,Nothing}) where {D}  = Int(unsafe_load(unsafe_load(D.desc).ord2idx, maxord(D)))
+TI.ndiffs(::InitGTPSA{D,Nothing}) where {D}  = Int(GTPSA.numnn(D))
+TI.maxord(::InitGTPSA{D,Nothing}) where {D}  = Int(unsafe_load(D.desc).mo)
+TI.nmonos(init::InitGTPSA{D,Nothing}) where {D}  = Int(unsafe_load(unsafe_load(D.desc).ord2idx, TI.maxord(init)))
 
 # =================================== #
 # Dynamic Descriptor Resolution:
-function TI.init_tps(::Type{T}, def::DefGTPSA{GTPSA.Dynamic,Descriptor}) where {T}
-  return TPS{T,GTPSA.Dynamic}(use=def.dynamic_descriptor)
+function TI.init_tps(::Type{T}, init::InitGTPSA{GTPSA.Dynamic,Descriptor}) where {T}
+  return TPS{T,GTPSA.Dynamic}(use=init.dynamic_descriptor)
 end
-TI.init_tps_type(::Type{T}, ::DefGTPSA{GTPSA.Dynamic,Descriptor}) where {T} = TPS{T,GTPSA.Dynamic}
+TI.init_tps_type(::Type{T}, ::InitGTPSA{GTPSA.Dynamic,Descriptor}) where {T} = TPS{T,GTPSA.Dynamic}
 
-function TI.getdef(t::TPS{T,GTPSA.Dynamic}) where {T} 
-  return DefGTPSA{GTPSA.Dynamic,Descriptor}(; dynamic_descriptor=GTPSA.getdesc(t))
-end
-
-function TI.getdef(::Type{TPS{T,GTPSA.Dynamic}}) where {T}
-  return DefGTPSA{GTPSA.Dynamic,Descriptor}(; dynamic_descriptor=GTPSA.desc_current)
+function TI.getinit(t::TPS{T,GTPSA.Dynamic}) where {T} 
+  return InitGTPSA{GTPSA.Dynamic,Descriptor}(; dynamic_descriptor=GTPSA.getdesc(t))
 end
 
-TI.nvars(def::DefGTPSA{GTPSA.Dynamic,Descriptor})   = Int(GTPSA.numvars(def.dynamic_descriptor))
-TI.nparams(def::DefGTPSA{GTPSA.Dynamic,Descriptor}) = Int(GTPSA.numparams(def.dynamic_descriptor))
-TI.ndiffs(def::DefGTPSA{GTPSA.Dynamic,Descriptor})  = Int(GTPSA.numnn(def.dynamic_descriptor))
-TI.maxord(def::DefGTPSA{GTPSA.Dynamic,Descriptor})  = Int(unsafe_load(def.dynamic_descriptor.desc).mo)
-TI.nmonos(def::DefGTPSA{GTPSA.Dynamic,Descriptor})  = Int(unsafe_load(unsafe_load(dynamic_descriptor.desc).ord2idx, maxord(def)))
+function TI.getinit(::Type{TPS{T,GTPSA.Dynamic}}) where {T}
+  return InitGTPSA{GTPSA.Dynamic,Descriptor}(; dynamic_descriptor=GTPSA.desc_current)
+end
+
+TI.ndiffs(init::InitGTPSA{GTPSA.Dynamic,Descriptor})  = Int(GTPSA.numnn(init.dynamic_descriptor))
+TI.maxord(init::InitGTPSA{GTPSA.Dynamic,Descriptor})  = Int(unsafe_load(init.dynamic_descriptor.desc).mo)
+TI.nmonos(init::InitGTPSA{GTPSA.Dynamic,Descriptor})  = Int(unsafe_load(unsafe_load(dynamic_descriptor.desc).ord2idx, TI.maxord(init)))
 # =================================== #
 
 TI.is_tps(::TPS) = TI.IsTPS()
@@ -87,6 +83,7 @@ function TI.compose!(
 end
 
 TI.fgrad!(g::TPS{T}, F::AbstractArray{TPS{T,D}}, h::TPS{T}) where {T,D} = GTPSA.fgrad!(g, F, h)
+
 function TI.liebra!(
   G::AbstractArray{TPS{T,DG}}, 
   F::AbstractArray{TPS{T,DF}}, 
@@ -94,6 +91,45 @@ function TI.liebra!(
 ) where {T,DG,DF,DH}
   @assert !(G === F) && !(G === H) "Aliasing any source arguments with the destination in lb! is not allowed"
   return GTPSA.liebra!(numvars(F), F, H, G)
+end
+
+function TI.cycle!(
+  t::TPS, 
+  i::Integer; 
+  mono::Union{AbstractArray{<:Integer},Nothing}=nothing, 
+  val::Union{Ref{<:Number},Nothing}=nothing
+)
+  if !isnothing(mono) 
+    if eltype(mono) == UInt8
+      m_ = mono
+    else
+      m_ = UInt8.(mono)
+    end
+    n = length(m_)
+  else
+    m_ = C_NULL
+    n = 0
+  end
+
+  if !isnothing(val)
+    if eltype(val) == TI.numtype(t)
+      v_ = val
+    else
+      v_ = Ref{TI.numtype(t)}(val)
+    end
+  else
+    v_ = C_NULL
+  end
+
+  out_i = GTPSA.cycle!(t, i, n, m_, v_)
+
+  if !isnothing(val)
+    val[] = v_[]
+  end
+  
+  if !isnothing(mono)
+    mono .= m_
+  end
 end
 
 end
