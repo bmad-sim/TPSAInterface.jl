@@ -130,6 +130,8 @@ function TI.cycle!(
   if !isnothing(mono)
     mono .= m_
   end
+
+  return out_i
 end
 
 end
