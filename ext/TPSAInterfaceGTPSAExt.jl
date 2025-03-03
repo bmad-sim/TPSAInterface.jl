@@ -4,34 +4,36 @@ using TPSAInterface: InitGTPSA
 using GTPSA: GTPSA, Descriptor, TPS
 
 # =================================== #
+#=
 # Static Descriptor Resolution:
-TI.init_tps(::Type{T}, ::InitGTPSA{D,Nothing}) where {T,D} = TPS{T,D}()
-TI.init_tps_type(::Type{T}, ::InitGTPSA{D,Nothing}) where {T,D} = TPS{T,D}
-TI.getinit(::TPS{T,D}) where {T,D} = InitGTPSA{D,Nothing}(; dynamic_descriptor=nothing)
-TI.getinit(::Type{TPS{T,D}}) where {T,D} = InitGTPSA{D,Nothing}(; dynamic_descriptor=nothing)
+TI.init_tps(::Type{T}, ::InitGTPSA{D,Nothing}) where {T,D} = TPS{T}()
+TI.init_tps_type(::Type{T}, ::InitGTPSA{D,Nothing}) where {T,D} = TPS{T}
+TI.getinit(::TPS{T}) where {T} = InitGTPSA{D,Nothing}(; dynamic_descriptor=nothing)
+TI.getinit(::Type{TPS{T}}) where {T} = InitGTPSA{D,Nothing}(; dynamic_descriptor=nothing)
 
 TI.ndiffs(::InitGTPSA{D,Nothing}) where {D}  = Int(GTPSA.numnn(D))
 TI.maxord(::InitGTPSA{D,Nothing}) where {D}  = Int(unsafe_load(D.desc).mo)
 TI.nmonos(init::InitGTPSA{D,Nothing}) where {D}  = Int(unsafe_load(unsafe_load(D.desc).ord2idx, TI.maxord(init)))
-
+=#
 # =================================== #
+
 # Dynamic Descriptor Resolution:
-function TI.init_tps(::Type{T}, init::InitGTPSA{GTPSA.Dynamic,Descriptor}) where {T}
-  return TPS{T,GTPSA.Dynamic}(use=init.dynamic_descriptor)
+function TI.init_tps(::Type{T}, init::InitGTPSA) where {T}
+  return TPS{T}(use=init.dynamic_descriptor)
 end
-TI.init_tps_type(::Type{T}, ::InitGTPSA{GTPSA.Dynamic,Descriptor}) where {T} = TPS{T,GTPSA.Dynamic}
+TI.init_tps_type(::Type{T}, ::InitGTPSA) where {T} = TPS{T}
 
-function TI.getinit(t::TPS{T,GTPSA.Dynamic}) where {T} 
-  return InitGTPSA{GTPSA.Dynamic,Descriptor}(; dynamic_descriptor=GTPSA.getdesc(t))
-end
-
-function TI.getinit(::Type{TPS{T,GTPSA.Dynamic}}) where {T}
-  return InitGTPSA{GTPSA.Dynamic,Descriptor}(; dynamic_descriptor=GTPSA.desc_current)
+function TI.getinit(t::TPS{T}) where {T} 
+  return InitGTPSA{Nothing,Descriptor}(; dynamic_descriptor=GTPSA.getdesc(t))
 end
 
-TI.ndiffs(init::InitGTPSA{GTPSA.Dynamic,Descriptor})  = Int(GTPSA.numnn(init.dynamic_descriptor))
-TI.maxord(init::InitGTPSA{GTPSA.Dynamic,Descriptor})  = Int(unsafe_load(init.dynamic_descriptor.desc).mo)
-TI.nmonos(init::InitGTPSA{GTPSA.Dynamic,Descriptor})  = Int(unsafe_load(unsafe_load(dynamic_descriptor.desc).ord2idx, TI.maxord(init)))
+function TI.getinit(::Type{TPS{T}}) where {T}
+  return InitGTPSA{Nothing,Descriptor}(; dynamic_descriptor=GTPSA.desc_current)
+end
+
+TI.ndiffs(init::InitGTPSA)  = Int(GTPSA.numnn(init.dynamic_descriptor))
+TI.maxord(init::InitGTPSA)  = Int(unsafe_load(init.dynamic_descriptor.desc).mo)
+TI.nmonos(init::InitGTPSA)  = Int(unsafe_load(unsafe_load(init.dynamic_descriptor.desc).ord2idx, TI.maxord(init)))
 # =================================== #
 
 TI.is_tps(::TPS) = TI.IsTPS()
@@ -68,27 +70,34 @@ TI.cutord!(t::TPS, t1::TPS, ord) = GTPSA.cutord!(t, t1, ord)
 TI.deriv!(t::TPS, t1::TPS, i) = GTPSA.deriv!(t, t1, i)
 
 function TI.inv!(
-  m::Union{AbstractArray{TPS{T,D}},TPS{T,D}}, 
-  m1::Union{AbstractArray{TPS{T,D1}},TPS{T,D1}}
-) where {T<:Union{Float64,ComplexF64},D,D1} 
-  return GTPSA.inv!(m, m1)
+  m::Union{AbstractArray{TPS{T}},TPS{T}}, 
+  m1::Union{AbstractArray{TPS{T}},TPS{T}}
+) where {T<:Union{Float64,ComplexF64}} 
+  return T == Float64 ? GTPSA.mad_tpsa_minv!(Cint(length(m1)), m1, GTPSA.numvars(first(m)), m) : GTPSA.mad_ctpsa_minv!(Cint(length(m1)), m1, GTPSA.numvars(first(m)), m)
 end
 
 function TI.compose!(
-  m::Union{AbstractArray{TPS{T,D}},TPS{T,D}}, 
-  m2::Union{AbstractArray{TPS{T,D2}},TPS{T,D2}},
-  m1::Union{AbstractArray{TPS{T,D1}},TPS{T,D1}}
-) where {T<:Union{Float64,ComplexF64},D,D1,D2}
+  m::Union{AbstractArray{TPS{T}},TPS{T}}, 
+  m2::Union{AbstractArray{TPS{T}},TPS{T}},
+  m1::Union{AbstractArray{TPS{T}},TPS{T}}
+) where {T<:Union{Float64,ComplexF64}}
   return GTPSA.compose!(m, m2, m1)
 end
 
-TI.fgrad!(g::TPS{T}, F::AbstractArray{TPS{T,D}}, h::TPS{T}) where {T,D} = GTPSA.fgrad!(g, F, h)
+function TI.fgrad!(g::TPS{T}, F::AbstractArray{TPS{T}}, h::TPS{T}) where {T}
+  if T == Float64
+    GTPSA.mad_tpsa_fgrad!(Cint(length(F)), F, h, g)
+  else
+    GTPSA.mad_ctpsa_fgrad!(Cint(length(F)), F, h, g)
+  end
+  return g
+end
 
 function TI.liebra!(
-  G::AbstractArray{TPS{T,DG}}, 
-  F::AbstractArray{TPS{T,DF}}, 
-  H::AbstractArray{TPS{T,DH}}
-) where {T,DG,DF,DH}
+  G::AbstractArray{TPS{T}}, 
+  F::AbstractArray{TPS{T}}, 
+  H::AbstractArray{TPS{T}}
+) where {T}
   @assert !(G === F) && !(G === H) "Aliasing any source arguments with the destination in lb! is not allowed"
   return GTPSA.liebra!(length(G), F, H, G)
 end
