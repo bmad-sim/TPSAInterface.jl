@@ -90,7 +90,7 @@ function TI.liebra!(
   H::AbstractArray{TPS{T,DH}}
 ) where {T,DG,DF,DH}
   @assert !(G === F) && !(G === H) "Aliasing any source arguments with the destination in lb! is not allowed"
-  return GTPSA.liebra!(numvars(F), F, H, G)
+  return GTPSA.liebra!(length(G), F, H, G)
 end
 
 function TI.cycle!(
