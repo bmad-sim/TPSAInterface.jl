@@ -12,7 +12,7 @@ TI.getinit(::Type{TPS{T,D}}) where {T,D} = InitGTPSA{D,Nothing}(; dynamic_descri
 
 TI.ndiffs(::InitGTPSA{D,Nothing}) where {D}  = Int(GTPSA.numnn(D))
 TI.maxord(::InitGTPSA{D,Nothing}) where {D}  = Int(unsafe_load(D.desc).mo)
-TI.nmonos(init::InitGTPSA{D,Nothing}) where {D}  = Int(unsafe_load(unsafe_load(D.desc).ord2idx, TI.maxord(init)))
+TI.nmonos(init::InitGTPSA{D,Nothing}) where {D}  = Int(unsafe_load(D.desc).nc)
 
 # =================================== #
 # Dynamic Descriptor Resolution:
@@ -31,7 +31,7 @@ end
 
 TI.ndiffs(init::InitGTPSA{GTPSA.Dynamic,Descriptor})  = Int(GTPSA.numnn(init.dynamic_descriptor))
 TI.maxord(init::InitGTPSA{GTPSA.Dynamic,Descriptor})  = Int(unsafe_load(init.dynamic_descriptor.desc).mo)
-TI.nmonos(init::InitGTPSA{GTPSA.Dynamic,Descriptor})  = Int(unsafe_load(unsafe_load(dynamic_descriptor.desc).ord2idx, TI.maxord(init)))
+TI.nmonos(init::InitGTPSA{GTPSA.Dynamic,Descriptor})  = Int(unsafe_load(unsafe_load(init.dynamic_descriptor.desc).ord2idx, TI.maxord(init)))
 # =================================== #
 
 TI.is_tps(::TPS) = TI.IsTPS()
@@ -47,9 +47,9 @@ TI.norm_tps(t::TPS) = GTPSA.normTPS(t)
 TI.clear!(t::TPS) = GTPSA.clear!(t)
 
 TI.geti(t::TPS, i::Integer) = t[i]
-TI.getm(t::TPS, mono::AbstractArray{<:Integer}) = t[mono]
+TI.getm(t::TPS, mono) = t[mono]
 TI.seti!(t::TPS, v, i::Integer) = (t[i] = v; return v)
-TI.setm!(t::TPS, v, mono::AbstractArray{<:Integer}) = (t[mono] = v; return v)
+TI.setm!(t::TPS, v, mono) = (t[mono] = v; return v)
 
 TI.copy!(t::TPS, t1) = GTPSA.setTPS!(t, t1, change=true)
 

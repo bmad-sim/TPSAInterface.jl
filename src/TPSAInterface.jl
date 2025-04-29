@@ -71,11 +71,11 @@ scalar part, and the monomials are sorted by order.
 geti(t, i::Integer) = error("Not implemented!") 
 
 """
-    getm(t, mono::AbstractArray{<:Integer}) 
+    getm(t, mono) 
 
 Gets the coefficient of the monomial with orders `mono`.
 """
-getm(t, mono::AbstractArray{<:Integer}) = error("Not implemented!")
+getm(t, mono) = error("Not implemented!")
 
 """
     seti!(t, v, i::Integer)
@@ -86,11 +86,11 @@ scalar part, and the monomials are sorted by order.
 seti!(t, v, i::Integer) = error("Not implemented!")
 
 """
-    setm!(t, v, mono::AbstractArray{<:Integer}) 
+    setm!(t, v, mono) 
 
 Sets the coefficient of the monomial with orders `mono` to `v`.
 """
-setm!(t, v, mono::AbstractArray{<:Integer}) = error("Not implemented!")
+setm!(t, v, mono) = error("Not implemented!")
 
 """
 Sets the entire TPS `t` equal to `t1`, where `t1` may be another TPS or a `Number`. Promotion 
