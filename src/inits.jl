@@ -3,7 +3,10 @@
 """
     abstract type AbstractTPSAInit
 
-Abstract type for a Taylor map used to initialize other Taylor maps. 
+Abstract type for Taylor series initialization. 
+This is analogous to the AutoGTPSA, AutoForwardDiff, etc types in ADTypes.jl. 
+The reason why a TPS type may not be suitable for initialization is because the dimensionality 
+may be stored at runtime as opposed to statically (e.g. TPS{GTPSA.Dynamic})
 """
 abstract type AbstractTPSAInit end
 
