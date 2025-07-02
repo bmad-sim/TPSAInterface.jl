@@ -1,5 +1,13 @@
 # TPSA Backends
+
+"""
+    abstract type AbstractTPSAInit
+
+Abstract type for a Taylor map used to initialize other Taylor maps. 
+"""
 abstract type AbstractTPSAInit end
+
+#
 
 """
     InitGTPSA{D,DD}
