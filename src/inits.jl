@@ -1,5 +1,16 @@
 # TPSA Backends
+
+"""
+    abstract type AbstractTPSAInit
+
+Abstract type for Taylor series initialization. 
+This is analogous to the AutoGTPSA, AutoForwardDiff, etc types in ADTypes.jl. 
+The reason why a TPS type may not be suitable for initialization is because the dimensionality 
+may be stored at runtime as opposed to statically (e.g. TPS{GTPSA.Dynamic})
+"""
 abstract type AbstractTPSAInit end
+
+#
 
 """
     InitGTPSA{D,DD}
