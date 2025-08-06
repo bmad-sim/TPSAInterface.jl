@@ -31,7 +31,7 @@ end
 
 TI.ndiffs(init::InitGTPSA{GTPSA.Dynamic,Descriptor})  = Int(GTPSA.numnn(init.dynamic_descriptor))
 TI.maxord(init::InitGTPSA{GTPSA.Dynamic,Descriptor})  = Int(unsafe_load(init.dynamic_descriptor.desc).mo)
-TI.nmonos(init::InitGTPSA{GTPSA.Dynamic,Descriptor})  = Int(unsafe_load(unsafe_load(init.dynamic_descriptor.desc).ord2idx, TI.maxord(init)))
+TI.nmonos(init::InitGTPSA{GTPSA.Dynamic,Descriptor})  = Int(unsafe_load(init.dynamic_descriptor.desc).nc)
 # =================================== #
 
 TI.is_tps(::TPS) = TI.IsTPS()
