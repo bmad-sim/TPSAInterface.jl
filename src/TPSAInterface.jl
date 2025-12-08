@@ -127,6 +127,7 @@ cutord!(t, t1, ord) = error("Not implemented!")
 # Defaults for out of place:
 getord(t1, ord) = (t = zero(t1); getord!(t, t1, ord); return t)
 cutord(t1, ord) = (t = zero(t1); cutord!(t, t1, ord); return t)
+deriv(t1, i)    = (t = zero(t1); deriv!(t, t1, i);    return t)
 
 # Derivative wrt the i-th differential
 "Sets `t` equal to the derivative of `t1` with respect to the `i`-th differential."
