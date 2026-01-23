@@ -51,7 +51,7 @@ TI.getm(t::TPS, mono) = t[mono]
 TI.seti!(t::TPS, v, i::Integer) = (t[i] = v; return v)
 TI.setm!(t::TPS, v, mono) = (t[mono] = v; return v)
 
-TI.copy!(t::TPS, t1) = GTPSA.setTPS!(t, t1, change=true)
+TI.copy_tps!(t::TPS, t1) = GTPSA.setTPS!(t, t1, change=true)
 
 TI.add!(t::TPS, a, b) = (GTPSA.add!(t, a, b); return t)
 TI.sub!(t::TPS, a, b) = (GTPSA.sub!(t, a, b); return t)
