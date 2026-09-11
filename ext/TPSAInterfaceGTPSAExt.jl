@@ -51,6 +51,18 @@ TI.getm(t::TPS, mono) = t[mono]
 TI.seti!(t::TPS, v, i::Integer) = (t[i] = v; return v)
 TI.setm!(t::TPS, v, mono) = (t[mono] = v; return v)
 
+function TI.isvalidm(t::TPS, mono)
+  nn = GTPSA.numnn(t)
+  m = zeros(UInt8, nn)
+  if length(mono) > m
+    return false
+  else
+    m[1:length(mono)] .= mono
+    d = GTPSA.getdesc(t).desc
+    return GTPSA.mad_desc_isvalidm(d, Cint(nn), m)
+  end
+end
+
 TI.copy_tps!(t::TPS, t1) = GTPSA.setTPS!(t, t1, change=true)
 
 TI.add!(t::TPS, a, b) = (GTPSA.add!(t, a, b); return t)

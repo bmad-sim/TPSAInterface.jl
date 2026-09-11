@@ -92,6 +92,13 @@ Sets the coefficient of the monomial with orders `mono` to `v`.
 setm!(t, v, mono) = error("Not implemented!")
 
 """
+    isvalidm(t, mono)
+
+Returns `true` if the monomial `mono` can be set in the TPS `t`, else `false`.
+"""
+isvalidm(t, mono) = error("Not implemented!")
+
+"""
 Sets the entire TPS `t` equal to `t1`, where `t1` may be another TPS or a `Number`. Promotion 
 is supported; e.g. if `t` has `numtype` `ComplexF64`, and `t1` has `numtype` `Float64`), 
 calling `copy_tps!(t, t1)` is allowed
