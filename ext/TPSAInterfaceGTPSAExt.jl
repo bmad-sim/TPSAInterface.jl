@@ -54,7 +54,7 @@ TI.setm!(t::TPS, v, mono) = (t[mono] = v; return v)
 function TI.isvalidm(t::TPS, mono)
   nn = GTPSA.numnn(t)
   m = zeros(UInt8, nn)
-  if length(mono) > m
+  if length(mono) > nn
     return false
   else
     m[1:length(mono)] .= mono
